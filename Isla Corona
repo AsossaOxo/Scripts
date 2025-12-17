@@ -1,6 +1,6 @@
-
-DECLARE @Fecha1 DATE = '2025-10-10';
-DECLARE @Fecha2 DATE = '20251010';
+use ISLA_CORONA
+DECLARE @Fecha1 DATE = '2025-12-07';
+DECLARE @Fecha2 DATE = '20251207';
 
 SELECT 1002 COD,39 CIA,fecha,M.nfolio RESERV, 1 TIP,A.ident_cli TERCERO,'001' SUC,
 CONVERT(int,(CASE WHEN dbcr = 'D' THEN 1 ELSE -1 END * valor )) VALOR,
@@ -50,8 +50,7 @@ FROM clientes C WHERE  C.ident_cli = A.ident_cli) DISPLAY_NAME,'' NOMBRE,
 (SELECT Max(codpais) FROM Clientes C WHERE  C.ident_cli = A.ident_cli) country,
 (SELECT Max(telef_cli) FROM Clientes C WHERE  C.ident_cli = A.ident_cli) phone_no
 FROM Movfolio M,Cargos C,Maefolio A
-WHERE M.ccargo_car = C.ccargo_car AND M.nfolio = A.nfolio AND fecha = @Fecha1 AND  M.ccargo_car = 1001 AND DBCR = 'D'
-
+WHERE M.ccargo_car = C.ccargo_car AND M.nfolio = A.nfolio AND fecha = @fecha1 AND  M.ccargo_car = 1001 and DBCR = 'D'
 
 
 
@@ -70,7 +69,7 @@ where C.fecha = @Fecha2 AND TRANSFERID IS NULL AND C.VVENTA <> 0 and C.plaza NOT
 UNION 
 
 --RESTAURANTE BEBIDAS(PLAYA)
-select  5001 COD,39 CIA, C.FECHA,C.cuenta RESERV,1 TIP,'333333333' TRECERO,'001' SUC,CONVERT(int,C.VVENTA) VALOR,
+select  5002 COD,39 CIA, C.FECHA,C.cuenta RESERV,1 TIP,'333333333' TRECERO,'001' SUC,CONVERT(int,C.VVENTA) VALOR,
 9999 HAB,CONVERT(VARCHAR(10), tiquete)  RECIBO,consuid TRX_NO,tiquete FACTURA,'RESTAURANTE BEBIDAS(PLAYA)' REFERENCIA, A.TIPOPROD NOTAS,'' NRO_TARJETA,'' AUTORIZACION,NULL FECHA_DE_VENC,'' FACT_ASOC,'REST' TIPO_DOC,CONVERT(int,C.VVENTA)  VALOR_ME,
 '' DISPLAY_NAME,'' NOMBRE,'' address1,'' city,''country,'' phone_no 
 from ps_consumos C
