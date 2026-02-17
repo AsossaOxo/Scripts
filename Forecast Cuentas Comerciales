@@ -1,0 +1,14 @@
+SELECT ROW_NUMBER() OVER (ORDER BY FechaCompleta) as Registro,TO_CHAR(FechaCompleta, 'DD') as Fecha,Ingreso,Noches,FechaCompleta 
+FROM (SELECT TO_CHAR(obi.business_date, 'DD') as Fecha,SUM(obi.room_revenue) as Ingreso,SUM(obi.cash_room_nts) 
+as Noches,obi.business_date as FechaCompleta FROM obi_reservation_stat_daily obi 
+WHERE obi.business_date BETWEEN '01/FEB/26'  AND '16/FEB/26' 
+GROUP BY TO_CHAR(obi.business_date, 'DD'), obi.business_date 
+
+
+UNION SELECT TO_CHAR(rs.considered_date, 'DD') as Fecha,SUM(rs.room_revenue) as Ingreso,SUM(rs.no_rooms) 
+as Noches,rs.considered_date as FechaCompleta FROM reservation_summary rs 
+WHERE rs.considered_date BETWEEN TO_DATE('16/FEB/26' , 'DD-MON-YY') 
+AND TO_DATE('28/FEB/26' , 'DD-MON-YY') AND rs.psuedo_room_yn = 'N' 
+GROUP BY TO_CHAR(rs.considered_date, 'DD'), rs.considered_date) ORDER BY FechaCompleta;
+
+
