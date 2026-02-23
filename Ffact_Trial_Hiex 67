@@ -1,24 +1,9 @@
-function detailFormula return Char is
-
-  out_file  Text_IO.File_Type;
-  cFileName varchar2(256);  
-  cOutFile varchar2(256);  
-  cFilePath varchar2(256);
-  cBofPath varchar2(2);  
-  cAppServer varchar2(30);
-  
-  --this is the main cursor that extracts the data to be written to the text file
-  --overwrite with your own query
-  cursor GetString is
-  
-  
------- cambiar la sentncia dentro de aca -----------------------------------------------------  
-
 SELECT distinct
 				ft1.trx_no rr,
 				decode(ft.queue_name,'FACTURA%','FV ','NCREDITO%','NC ','MI ') DOCUMENTO, -- prueba agregando micros
-				case 
-				when ft.bill_no Between 2000 and 2999 then 'INTERNAL' ELSE FT.FOLIO_TYPE END AS TIPO_DE_DOCUMENTO,
+				--case 
+				--when ft.bill_no Between 2000 and 2999 then 'INTERNAL' ELSE FT.FOLIO_TYPE END AS TIPO_DE_DOCUMENTO,
+                FT.FOLIO_TYPE  TIPO_DE_DOCUMENTO,
 				ft.queue_name, 
 				LPAD(ft.bill_no,8) CONSECUTIVO_FACTURA,
 				to_char(ft.bill_start_date,'DD/MM/YY') FECHA_FACTURA,
@@ -31,7 +16,7 @@ SELECT distinct
 				lpad(nvl(nv.udfc03,'000'),3,' ') SUCURSAL,
 				lpad((case when (nv.nationality is null) then ' ' else nv.nationality end),3,' ') NACIONALIDAD,
 				lpad(rv.confirmation_no,8,' ') RESERVA, 
-				lpad(ft1.trx_code,5,' ') CODIGO_TRANSACCION,
+				lpad(ft1.trx_code,4,' ') CODIGO_TRANSACCION,
 				to_char(FT1.TRX_DATE,'DD/MM/YY') FECHA_TRANSACCION,
 				lpad(to_char(Nvl((ft1.net_amount),nvl((ft1.posted_amount),2)),'99999999999999'),20) valor_total,-- PRUEBA
 				ft1.exchange_rate exchange_rate,
@@ -40,18 +25,24 @@ SELECT distinct
 				lpad (ft.associated_bill_no, 8,' ') Factura_asociada,
 				decode (to_char (ft1.bill_no), ' ', to_char (ft1.recpt_no), ' ') Recibo, 
         nv.address1||' '||nv.city||' '|| nv.country_desc address, 
-        nv.phone_no
+        nv.phone_no, mct.description SEGMENTO, obt.description CANAL
    
    from folio_tax ft, 
         financial_transactions ft1,
         TRX$_CODES TC,
         name_view nv,
+        market_codes_template_e mct,
+        origins_of_booking_template_e obt,
         reservation_name rv
               
  where 
    --FOLIO TAX
-   ft.resort = pms_p.resort
-   AND FT.bill_start_date =:up_from_date
+   --ft.resort = pms_p.resort
+   FT.bill_start_date  =:up_from_date
+   --AND ft1.trx_code = '8997'
+   AND rv.confirmation_no='7831179'
+   and ft1.market_code=mct.market_code
+   and ft1.source_code=obt.source_code
    and nvl(ft.resv_name_id,-1) = nvl(ft1.resv_name_id,-1)
    and ft.folio_type = ft1.folio_Type
    and ft.bill_no = ft1.bill_no
@@ -73,8 +64,9 @@ SELECT distinct
  SELECT distinct
 				ft1.trx_no rr,
 				decode(ft.queue_name,'FACTURA%','FV ','NCREDITO%','NC ','MI ') DOCUMENTO, -- prueba agregando micros
-					case 
-				when ft.bill_no Between 2000 and 2999 then 'INTERNAL' ELSE FT.FOLIO_TYPE END AS TIPO_DE_DOCUMENTO,
+				--	case 
+				---when ft.bill_no Between 2000 and 2999 then 'INTERNAL' ELSE FT.FOLIO_TYPE END AS TIPO_DE_DOCUMENTO,
+                 FT.FOLIO_TYPE  TIPO_DE_DOCUMENTO,
 				ft.queue_name, 
 				LPAD(ft.bill_no,8) CONSECUTIVO_FACTURA,
 				to_char(ft.bill_start_date,'DD/MM/YY') FECHA_FACTURA,
@@ -87,7 +79,7 @@ SELECT distinct
 				lpad(nvl(nv.udfc03,'000'),3,' ') SUCURSAL,
 				lpad((case when (nv.nationality is null) then ' ' else nv.nationality end),3,' ') NACIONALIDAD,
 				lpad(rv.confirmation_no,8,' ') RESERVA, 
-				lpad(ft1.trx_code,5,' ') CODIGO_TRANSACCION,
+				lpad(ft1.trx_code,4,' ') CODIGO_TRANSACCION,
 				to_char(FT1.TRX_DATE,'DD/MM/YY') FECHA_TRANSACCION,
 				--lpad(to_char(Nvl((ft1.net_amount),nvl((ft1.posted_amount),0)),'99999999999999'),20) valor_total,-- PRUEBA
 				lpad(to_char(Nvl(ft1.net_amount,nvl(ft1.posted_amount/ft1.exchange_rate,2)),'99999999999999'),20) valor_total,-- PRUEBA
@@ -97,19 +89,25 @@ SELECT distinct
 				lpad (ft.associated_bill_no, 8,' ') Factura_asociada,
 				decode (to_char (ft1.bill_no), ' ', to_char (ft1.recpt_no), ' ') Recibo, 
         nv.address1||' '||nv.city||' '|| nv.country_desc address, 
-        nv.phone_no
+        nv.phone_no,  mct.description SEGMENTO, obt.description CANAL
    
    
    from folio_tax ft, 
         financial_transactions ft1,
         TRX$_CODES TC,
         name_view nv,
+        market_codes_template_e mct,
+        origins_of_booking_template_e obt,
         reservation_name rv
        
  where 
    --FOLIO TAX
-       ft.resort = pms_p.resort
-   AND FT.bill_start_date =:up_from_date
+    --   ft.resort = pms_p.resort
+    FT.bill_start_date  =:up_from_date
+  --  AND ft1.trx_code = '8997'
+   AND rv.confirmation_no='7831179'
+   and ft1.market_code=mct.market_code
+   and ft1.source_code=obt.source_code
    and nvl(ft.resv_name_id,-1) = nvl(ft1.resv_name_id,-1)
    and ft.folio_type = ft1.folio_Type
    and ft.bill_no = ft1.bill_no
@@ -122,82 +120,7 @@ SELECT distinct
    and  (nvl(ft1.guest_account_credit,0)<>0)
    and nv.name_id=ft.payee_name_id
    and nvl(rv.RESV_name_id,-1)=nvl(ft1.RESV_name_id,-1)--rv.resv_name_id=ft1.resv_name_id;
+   
  
  ORDER BY 3,5,13;
  
- --ORDER BY 1,2,3,11;
- 
- 
- 
----------------------------------------------------------------------------------- hasta aca---------------------------	
- BEGIN
-   
-    SELECT substr(pms_p.get_parameter('CUST_REPORTS'),1,2) 
-     INTO cBofPath 
-     FROM dual;
-     
-   --cFilePath := lower(cBofPath || '\micros\opera\export\' || USER || '\' || :p_resort || '\');
-   cFilePath := lower('d:\BOF_EXPORT\'||:P_RESORT||'\'); 
-   --this select is for the file name. use your own formulas
- 
-   ---- modificar nombre de archivo a dejar----------------
-   SELECT 'F_FAC' || :p_resort || To_char(:up_from_date,'YYMMDD') || '.TXT' 
-     INTO cFileName 
-     FROM dual;
-   
-   SELECT pms_p.get_parameter('REPORT_APPLICATION_SERVER_NAME') 
-     INTO cAppServer 
-     FROM dual;
-
-	 cOutFile := lower(cAppServer || '/export/' || user || '/' || :p_resort || '/' || cFileName);
-   
-   cFileName := cFilePath || cFileName;
-   
-   out_file := Text_IO.Fopen(cFileName, 'w');
-   
-   --uncomment next line if header is needed
-    Text_IO.Put_Line(out_file, 'DOC    |CONS    |F_FACTUR|F_CORTE |CIA|TIP|TERCERO        |SUC|NAC|RESERV  |COD |FECHA_T |VALOR               |HAB   |FACTURA ASOCIADA| NRO_TRX  | RECIBO| NTERCERO|NOMBRE |TASADECAMBIO|TIPOMONEDA|DIRECCION|TEL');
-    
-   --open the cursor and fetch for records
-   --- cambiar aca el nombre de los campos ejemplo w.campo1---------------------------------------
-   FOR w IN GetString 
-   LOOP
- 			Text_IO.Put(out_file, w.Tipo_de_Documento||CHR(124));
-      Text_IO.Put(out_file, w.Consecutivo_Factura||CHR(124));
-      Text_IO.Put(out_file, w.Fecha_factura||CHR(124));
-      Text_IO.Put(out_file, w.Fecha_corte_factura||CHR(124));
-      Text_IO.Put(out_file, w.Compania||CHR(124));
-      Text_IO.Put(out_file, w.Tipo_Tercero||CHR(124));
-      Text_IO.Put(out_file, w.Tercero||CHR(124));
-      Text_IO.Put(out_file, w.Sucursal||CHR(124));
-      Text_IO.Put(out_file, w.Nacionalidad||CHR(124));
-      Text_IO.Put(out_file, w.Reserva||CHR(124));
-      Text_IO.Put(out_file, w.Codigo_transaccion||CHR(124));
-      Text_IO.Put(out_file, w.Fecha_transaccion||CHR(124));
-      Text_IO.Put(out_file, w.Valor_total||CHR(124));
-      Text_IO.Put(out_file, w.Numero_de_Habitacion ||CHR(124));
-      Text_IO.Put(out_file, w.factura_asociada ||CHR(124));
-      Text_IO.Put(out_file, w.recibo||CHR(124));
-      Text_IO.Put(out_file, w.rr||CHR(124));
-      Text_IO.Put(out_file, w.NTERCERO||CHR(124));
-      Text_IO.Put(out_file, w.NOMBRE||CHR(124));
-      Text_IO.Put(out_file, w.exchange_rate||CHR(124));
-      Text_IO.Put(out_file, w.CURRENCY||CHR(124));
-      Text_IO.Put(out_file, trim(w.address)||CHR(124));
-      Text_IO.Put(out_file, trim(w.phone_no));
-      Text_IO.New_Line(out_file);      
-   END LOOP; 
-   Text_IO.Fclose (out_file);
-
-   RETURN (cOutFile);
-        
-eXCEPTION
-   WHEN OTHERS
-   THEN
-    	IF Text_IO.Is_Open(out_file) 
-    	THEN
-    	   Text_IO.Fclose(out_file);
-    	END IF;
-   RETURN (SQLERRM || ' on detail formula, please check.');
-
-END;
