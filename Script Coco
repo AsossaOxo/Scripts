@@ -1,6 +1,7 @@
 
 	use COCO
- DECLARE @Fecha1 DATE = '2025-12-05';
+DECLARE @Fecha1 DATE = '2026-02-12';
+DECLARE @Fecha2 DATE = '20260212';
 
  --select * from  movfolio where fecha=  @Fecha1 AND CCARGO_CAR = 1010 AND DBCR ='D'
 
