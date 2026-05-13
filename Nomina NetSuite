@@ -1,22 +1,31 @@
 
---PPS  Documento Contable
-select * from dbo.t350_co_docto_contable where f350_id_cia = '8' AND f350_fecha= '2025-05-31' AND f350_id_tipo_docto ='PPS'
+
+     use UnoEE_Oxo_Real
+SELECT aux.f253_id AS cuenta,  mov.f351_valor_db AS debito, mov.f351_valor_cr AS credito, ter.f200_id, aux.f253_descripcion AS descripcion,cco.f284_id, cco.f284_descripcion, (mov.f351_valor_db + mov.f351_valor_cr) AS total 
+      FROM UnoEE_Oxo_Real.dbo.t350_co_docto_contable cont 
+      INNER JOIN UnoEE_Oxo_Real.dbo.t351_co_mov_docto mov   
+      ON cont.f350_rowid = mov.f351_rowid_docto 
+      INNER JOIN UnoEE_Oxo_Real.dbo.t253_co_auxiliares aux 
+      ON mov.f351_rowid_auxiliar = aux.f253_rowid
+	  INNER JOIN UnoEE_Oxo_Real.dbo.t200_mm_terceros ter 
+      ON mov.f351_rowid_tercero = ter.f200_rowid
+	  INNER JOIN UnoEE_Oxo_Real.dbo.t284_co_ccosto cco
+      ON mov.f351_rowid_ccosto = cco.f284_rowid
+
+ where f350_id_cia = '8' AND f350_id_tipo_docto  = 'NQ'   AND f350_consec_docto = '352'      -- f351_rowid_tercero   f200_rowid 
 
 
 
---PPS  Documento Contable los tres docuemtnos totales 
-select * from dbo.t350_co_docto_contable where f350_id_cia = '8' 
-AND f350_id_tipo_docto ='PPS'  AND
-f350_id_tipo_docto ='APS'  
- AND f350_id_tipo_docto ='NQ' 
- 
- AND  f351_fecha= '2025-05-01'
+ select * from t200_mm_terceros  where f200_id = '1069762790'
+
+ select * from t284_co_ccosto -- f284_rowid   f284_descripcion   f351_rowid_ccosto
 
 
--- movimiento del documento 
-select *  from t351_co_mov_docto where f351_id_cia = '8' AND f351_fecha= '2025-05-31' AND f351_rowid_docto ='1449485' AND f351_rowid_tercero= '197165'
--- Tercero a consultar 
-select * from t202_mm_proveedores where f202_rowid_tercero ='197165'
+--1  PPS  Documento Contable
+select * from dbo.t350_co_docto_contable where f350_id_cia = '8'    AND f350_consec_docto = '352'-- f350_id_tipo_docto  = NQ  f350_consec_docto = 348  me debo de llevar este documento f350_rowid_docto =  1719064
 
--- se debe d etomar el numero de la cuenta de esta tabla con el f253_id = 52053601            
-select  * from t253_co_auxiliares where f253_rowid = '4692'
+-- 2  Movimiento del Documento 
+select *  from t351_co_mov_docto where f351_rowid_docto ='1719064'   -- f351_rowid_tercero   f200_rowid 
+
+-- 3 -- se debe d etomar el numero de la cuenta de esta tabla con el f253_id = 52053601            
+select  * from t253_co_auxiliares where f253_rowid = '4681' -- necesito traer de esta tabla  f253_id 52050601  f253_descripcion 
